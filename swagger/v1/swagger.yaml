@@ -1,0 +1,156 @@
+---
+openapi: 3.0.1
+info:
+  title: API V1
+  version: v1
+  description: API for managing users and movies
+paths:
+  "/users":
+    post:
+      summary: User registration
+      tags:
+      - Authentication
+      parameters: []
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  email:
+                    type: string
+                  mobile_number:
+                    type: string
+        '422':
+          description: Invalid registration request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    email:
+                      type: string
+                    password:
+                      type: string
+                    mobile_number:
+                      type: string
+                  required:
+                  - name
+                  - email
+                  - password
+                  - mobile_number
+              required:
+              - user
+  "/users/sign_in":
+    post:
+      summary: User login
+      tags:
+      - Authentication
+      parameters: []
+      responses:
+        '200':
+          description: User logged in successfully
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    id: 1
+                    email: user@example.com
+                    name: Aalek
+                    mobile_number: "+12345678901"
+                    token: some_jwt_token_here
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  email:
+                    type: string
+                  name:
+                    type: string
+                  mobile_number:
+                    type: string
+                  token:
+                    type: string
+        '401':
+          description: Unauthorized login attempt
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Invalid email or password
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    email:
+                      type: string
+                    password:
+                      type: string
+                  required:
+                  - email
+                  - password
+              required:
+              - user
+  "/users/sign_out":
+    delete:
+      summary: User logout
+      tags:
+      - Authentication
+      responses:
+        '204':
+          description: User logged out successfully
+  "/api/v1/current_user":
+    get:
+      summary: Fetch current user
+      tags:
+      - Users
+      responses:
+        '200':
+          description: User details returned
+        '401':
+          description: Unauthorized access
+servers:
+- url: http://localhost:3000
+  description: Local server
+- url: https://movie-explorer-ror-aman-w8f9.onrender.com
+  description: Production server
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

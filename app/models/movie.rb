@@ -1,6 +1,5 @@
 class Movie < ApplicationRecord
   has_one_attached :poster
-  has_one_attached :banner
 
   validates :title, presence: true
   validates :genre, presence: true
