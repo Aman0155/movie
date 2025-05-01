@@ -6,31 +6,39 @@ module Api
       before_action :ensure_supervisor, only: [:create, :update, :destroy]
 
       def index
-        movies = Movie.all
+        begin
+          movies = Movie.all
 
-        if params[:title].present?
-          movies = movies.where("title ILIKE ?", "%#{params[:title]}%")
-        end
+          if params[:title].present?
+            movies = movies.where("title ILIKE ?", "%#{params[:title]}%")
+          end
 
-        if params[:genre].present?
-          movies = movies.where(genre: params[:genre])
-        end
+          if params[:genre].present?
+            movies = movies.where(genre: params[:genre])
+          end
 
-        movies = movies.page(params[:page] || 1).per(params[:per_page] || 10)
+          # Sanitize pagination params
+          page = [params[:page].to_i, 1].max
+          per_page = [[params[:per_page].to_i, 1].max, 50].min
+          movies = movies.page(page).per(per_page)
 
-        if movies.empty?
-          render json: { error: "No movies found" }, status: :not_found
-        else
-          serialized = movies.map { |movie| ::MovieSerializer.new(movie).serializable_hash }
-          render json: {
-            movies: serialized,
-            pagination: {
-              current_page: movies.current_page,
-              total_pages: movies.total_pages,
-              total_count: movies.total_count,
-              per_page: movies.limit_value
-            }
-          }, status: :ok
+          if movies.empty?
+            render json: { error: "No movies found" }, status: :not_found
+          else
+            serialized = movies.map { |movie| ::MovieSerializer.new(movie).serializable_hash }
+            render json: {
+              movies: serialized,
+              pagination: {
+                current_page: movies.current_page,
+                total_pages: movies.total_pages,
+                total_count: movies.total_count,
+                per_page: movies.limit_value
+              }
+            }, status: :ok
+          end
+        rescue => e
+          Rails.logger.error("Error fetching movies: #{e.message}\n#{e.backtrace.join("\n")}")
+          render json: { error: "Internal Server Error" }, status: :internal_server_error
         end
       end
 
