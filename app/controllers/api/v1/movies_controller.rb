@@ -2,7 +2,7 @@ module Api
   module V1
     class MoviesController < ApplicationController
       skip_before_action :verify_authenticity_token
-      before_action :authenticate_user!
+      before_action :authenticate_user!, only: [:create, :update, :destroy]
       before_action :ensure_supervisor, only: [:create, :update, :destroy]
 
       def index
