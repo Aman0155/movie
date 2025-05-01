@@ -29,6 +29,7 @@ gem 'rswag-ui'
 gem 'factory_bot_rails' 
 gem 'faker'
 gem 'stripe'
+gem 'kaminari'
 
 group :development, :test do
   gem "debug", platforms: %i[ mri windows ]
